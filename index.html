@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0d0d0d;
+      color: #00ff9c;
+      font-family: monospace;
+    }
+
+    #terminal {
+      padding: 15px;
+      height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .line {
+      display: flex;
+    }
+
+    .prompt {
+      margin-right: 5px;
+    }
+
+    input {
+      background: transparent;
+      border: none;
+      color: #00ff9c;
+      outline: none;
+      width: 100%;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+
+    const commands = {
+      help: () => {
+        return `Available commands:\nhelp - Show commands\nclear - Clear terminal\nls - List files\ncat [file] - View file`;
+      },
+
+      clear: () => {
+        terminal.innerHTML = '';
+        return '';
+      },
+
+      ls: () => {
+        return 'index.html\nserver.jar\nconfig.yml';
+      },
+
+      cat: (args) => {
+        if (!args[0]) return 'Usage: cat [file]';
+
+        const fakeFiles = {
+          'config.yml': 'server-name: My Server\nmax-players: 20',
+          'index.html': '<html>...</html>'
+        };
+
+        return fakeFiles[args[0]] || 'File not found';
+      }
+    };
+
+    function createInputLine() {
+      const line = document.createElement('div');
+      line.className = 'line';
+
+      const prompt = document.createElement('span');
+      prompt.className = 'prompt';
+      prompt.textContent = 'user@web:$';
+
+      const input = document.createElement('input');
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const value = input.value.trim();
+          input.disabled = true;
+          handleCommand(value);
+        }
+      });
+
+      line.appendChild(prompt);
+      line.appendChild(input);
+      terminal.appendChild(line);
+
+      input.focus();
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function printOutput(text) {
+      if (!text) return;
+      const output = document.createElement('div');
+      output.textContent = text;
+      terminal.appendChild(output);
+    }
+
+    function handleCommand(input) {
+      const [cmd, ...args] = input.split(' ');
+
+      if (commands[cmd]) {
+        const result = commands[cmd](args);
+        printOutput(result);
+      } else if (cmd !== '') {
+        printOutput(`Command not found: ${cmd}`);
+      }
+
+      createInputLine();
+    }
+
+    // Start terminal
+    createInputLine();
+  </script>
+</body>
+</html>
